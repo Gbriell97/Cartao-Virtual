@@ -1,0 +1,961 @@
+export type TemplateLayout =
+  | "modern"
+  | "professional"
+  | "classic"
+  | "bold"
+  | "invitation"
+  | "floral"
+  | "elegant"
+  | "health"
+  | "executive"
+  | "minimal"
+  | "photographic"
+  | "luxury"
+  | "geometric"
+  | "dark"
+  | "nature"
+  | "beauty"
+  | "tech"
+  | "glass"
+  | "glass-pro"
+  | "glass-frost"
+  | "glass-dark"
+  | "glass-clear";
+
+export type TemplateBackground =
+  | {
+      type: "gradient";
+      value: string;
+    }
+  | {
+      type: "image";
+      value: string;
+    };
+
+export type TemplateConfig = {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+
+  layoutType: TemplateLayout;
+
+  defaults: {
+    primaryColor: string;
+    textNameColor: string;
+    textJobColor: string;
+    textLocationColor: string;
+    primaryColorOpacity: number;
+    usePrimaryColor: boolean;
+    backgroundOverlay: number;
+    backgroundBlur: number;
+    showPhoto: boolean;
+    showBackground: boolean;
+  };
+
+  background: TemplateBackground;
+
+  layout: {
+    cardRadius: string;
+    contentStyle: string;
+    photoStyle: string;
+    nameStyle: string;
+    jobStyle: string;
+    locationStyle: string;
+    linksStyle: string;
+    buttonStyle: string;
+    headerStyle: string;
+    profileSize: string;
+    contentSpacing: string;
+    buttonHeight: string;
+    buttonFont: string;
+    decoration: string;
+  };
+};
+
+export const templates: TemplateConfig[] = [
+  {
+    id: "rosa",
+    name: "Rosa Moderno",
+    category: "Moderno",
+    description: "Visual moderno, delicado e marcante.",
+    layoutType: "modern",
+    defaults: {
+      primaryColor: "#EC4899",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#FFFFFF",
+      textLocationColor: "#FCE7F3",
+      primaryColorOpacity: 80,
+      usePrimaryColor: true,
+      backgroundOverlay: 20,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #831843 0%, #ec4899 48%, #f9a8d4 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-white/70",
+      nameStyle: "text-3xl font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full backdrop-blur-md",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "pink",
+    },
+  },
+
+  {
+    id: "azul",
+    name: "Oceano",
+    category: "Corporativo",
+    description: "Azul profissional com composição fotográfica.",
+    layoutType: "professional",
+    defaults: {
+      primaryColor: "#0EA5E9",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#E0F2FE",
+      textLocationColor: "#BAE6FD",
+      primaryColorOpacity: 82,
+      usePrimaryColor: true,
+      backgroundOverlay: 28,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(160deg, #082f49 0%, #0369a1 52%, #22d3ee 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.75rem]",
+      contentStyle: "",
+      photoStyle: "rounded-2xl border-2 border-white/40",
+      nameStyle: "text-2xl font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-2xl backdrop-blur-md",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "blue",
+    },
+  },
+
+  {
+    id: "advocacia",
+    name: "Clássico",
+    category: "Elegante",
+    description: "Composição clássica inspirada em escritórios e marcas premium.",
+    layoutType: "classic",
+    defaults: {
+      primaryColor: "#B58B45",
+      textNameColor: "#3B2F23",
+      textJobColor: "#6B5B4A",
+      textLocationColor: "#806F5C",
+      primaryColorOpacity: 90,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #f8f1e6 0%, #efe2cf 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.25rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-[#b58b45] p-1",
+      nameStyle: "font-serif text-3xl font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-2",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "gold",
+    },
+  },
+
+  {
+    id: "motorista",
+    name: "Motorista",
+    category: "Serviços",
+    description: "Forte, direto e pensado para contato rápido.",
+    layoutType: "bold",
+    defaults: {
+      primaryColor: "#FACC15",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#FDE68A",
+      textLocationColor: "#E5E7EB",
+      primaryColorOpacity: 92,
+      usePrimaryColor: true,
+      backgroundOverlay: 62,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #09090b 0%, #18181b 55%, #3f3f46 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-2xl",
+      contentStyle: "",
+      photoStyle: "rounded-2xl border-2 border-yellow-400",
+      nameStyle: "text-2xl font-black uppercase leading-tight tracking-tight",
+      jobStyle: "text-sm font-bold uppercase",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-4",
+      buttonFont: "font-bold uppercase tracking-wide",
+      decoration: "yellow",
+    },
+  },
+
+  {
+    id: "convite",
+    name: "Convite",
+    category: "Delicado",
+    description: "Elegante e acolhedor, inspirado em convites.",
+    layoutType: "invitation",
+    defaults: {
+      primaryColor: "#A855F7",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#F3E8FF",
+      textLocationColor: "#E9D5FF",
+      primaryColorOpacity: 75,
+      usePrimaryColor: true,
+      backgroundOverlay: 12,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #4c1d95 0%, #7e22ce 48%, #c084fc 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2.25rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-white/60",
+      nameStyle: "text-3xl font-semibold italic leading-tight",
+      jobStyle: "text-sm italic",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "purple",
+    },
+  },
+
+  {
+    id: "floral",
+    name: "Floral",
+    category: "Beleza",
+    description: "Delicado, orgânico e feminino.",
+    layoutType: "floral",
+    defaults: {
+      primaryColor: "#DB2777",
+      textNameColor: "#4A1D32",
+      textJobColor: "#7A3B57",
+      textLocationColor: "#8B5E72",
+      primaryColorOpacity: 82,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #fff1f7 0%, #fce7f3 52%, #fbcfe8 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-pink-200",
+      nameStyle: "text-3xl font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "floral",
+    },
+  },
+
+  {
+    id: "verde",
+    name: "Natureza",
+    category: "Natural",
+    description: "Visual orgânico com verde sofisticado.",
+    layoutType: "elegant",
+    defaults: {
+      primaryColor: "#15803D",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#DCFCE7",
+      textLocationColor: "#BBF7D0",
+      primaryColorOpacity: 84,
+      usePrimaryColor: true,
+      backgroundOverlay: 32,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #052e16 0%, #166534 50%, #4d7c0f 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.75rem]",
+      contentStyle: "",
+      photoStyle: "rounded-xl border-2 border-emerald-300/70",
+      nameStyle: "text-2xl font-bold leading-tight",
+      jobStyle: "text-sm",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "green",
+    },
+  },
+
+  {
+    id: "medico",
+    name: "Saúde Clean",
+    category: "Saúde",
+    description: "Limpo, claro e profissional.",
+    layoutType: "health",
+    defaults: {
+      primaryColor: "#0891B2",
+      textNameColor: "#164E63",
+      textJobColor: "#155E75",
+      textLocationColor: "#64748B",
+      primaryColorOpacity: 90,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #ecfeff 0%, #ffffff 50%, #cffafe 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.5rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-cyan-200",
+      nameStyle: "text-2xl font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-2xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "cyan",
+    },
+  },
+
+  {
+    id: "executivo",
+    name: "Executivo",
+    category: "Premium",
+    description: "Executivo, discreto e sofisticado.",
+    layoutType: "executive",
+    defaults: {
+      primaryColor: "#D4AF37",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#E5E7EB",
+      textLocationColor: "#9CA3AF",
+      primaryColorOpacity: 92,
+      usePrimaryColor: true,
+      backgroundOverlay: 62,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #030712 0%, #111827 48%, #374151 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-xl",
+      contentStyle: "",
+      photoStyle: "rounded-xl border border-white/20",
+      nameStyle: "text-2xl font-bold leading-tight",
+      jobStyle: "text-sm uppercase tracking-wider",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-lg",
+      headerStyle: "justify-between",
+      profileSize: "h-20 w-20",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "executive",
+    },
+  },
+
+  {
+    id: "minimal",
+    name: "Minimalista",
+    category: "Minimal",
+    description: "Minimalismo premium, tipografia elegante e foco absoluto no conteúdo.",
+    layoutType: "minimal",
+    defaults: {
+      primaryColor: "#111827",
+      textNameColor: "#111827",
+      textJobColor: "#4B5563",
+      textLocationColor: "#6B7280",
+      primaryColorOpacity: 100,
+      usePrimaryColor: false,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #ffffff 0%, #f8fafc 48%, #eef2f7 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2rem]",
+      contentStyle: "pb-2",
+      photoStyle: "rounded-2xl border border-black/5 shadow-xl",
+      nameStyle: "text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em]",
+      jobStyle: "text-sm font-medium tracking-wide",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-2xl border border-black/10 bg-white/75 shadow-sm backdrop-blur-xl",
+      headerStyle: "justify-end",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-4",
+      buttonHeight: "py-3.5",
+      buttonFont: "font-medium",
+      decoration: "minimal",
+    },
+  },
+
+  {
+    id: "fotografico",
+    name: "Fotográfico",
+    category: "Criativo",
+    description: "A fotografia é o principal elemento visual.",
+    layoutType: "photographic",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#F3F4F6",
+      textLocationColor: "#D1D5DB",
+      primaryColorOpacity: 72,
+      usePrimaryColor: true,
+      backgroundOverlay: 48,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #111827 0%, #374151 50%, #000000 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.5rem]",
+      contentStyle: "",
+      photoStyle: "rounded-2xl border-2 border-white/70",
+      nameStyle: "text-3xl font-black leading-tight",
+      jobStyle: "text-sm",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-lg backdrop-blur-md",
+      headerStyle: "justify-between",
+      profileSize: "h-36 w-full",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "photo",
+    },
+  },
+
+  {
+    id: "luxo",
+    name: "Luxury Gold",
+    category: "Premium",
+    description: "Preto, dourado e detalhes de luxo.",
+    layoutType: "luxury",
+    defaults: {
+      primaryColor: "#D4AF37",
+      textNameColor: "#F5E6B3",
+      textJobColor: "#FFFFFF",
+      textLocationColor: "#C9C9C9",
+      primaryColorOpacity: 88,
+      usePrimaryColor: true,
+      backgroundOverlay: 58,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #090909 0%, #171717 48%, #3b2f0b 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.25rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-[#d4af37] p-1",
+      nameStyle: "font-serif text-3xl font-bold leading-tight",
+      jobStyle: "text-xs uppercase tracking-[0.25em]",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-lg",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "luxury",
+    },
+  },
+
+  {
+    id: "geometrico",
+    name: "Geométrico",
+    category: "Criativo",
+    description: "Formas, contrastes e composição contemporânea.",
+    layoutType: "geometric",
+    defaults: {
+      primaryColor: "#7C3AED",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#EDE9FE",
+      textLocationColor: "#DDD6FE",
+      primaryColorOpacity: 86,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(135deg, #312e81 0%, #7c3aed 50%, #db2777 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.75rem]",
+      contentStyle: "",
+      photoStyle: "rounded-2xl border-4 border-white/60",
+      nameStyle: "text-3xl font-black leading-tight",
+      jobStyle: "text-sm font-semibold uppercase",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-semibold",
+      decoration: "geometric",
+    },
+  },
+
+  {
+    id: "dark",
+    name: "Dark Premium",
+    category: "Dark",
+    description: "Minimalismo escuro com alto contraste.",
+    layoutType: "dark",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#D1D5DB",
+      textLocationColor: "#9CA3AF",
+      primaryColorOpacity: 18,
+      usePrimaryColor: true,
+      backgroundOverlay: 45,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #020617 0%, #111827 55%, #1f2937 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.5rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border border-white/30",
+      nameStyle: "text-3xl font-bold leading-tight",
+      jobStyle: "text-sm",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full border border-white/20",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "dark",
+    },
+  },
+
+  {
+    id: "nature",
+    name: "Orgânico",
+    category: "Natural",
+    description: "Formas suaves e identidade inspirada na natureza.",
+    layoutType: "nature",
+    defaults: {
+      primaryColor: "#65A30D",
+      textNameColor: "#365314",
+      textJobColor: "#4D7C0F",
+      textLocationColor: "#64748B",
+      primaryColorOpacity: 82,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #f7fee7 0%, #ecfccb 52%, #d9f99d 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-lime-200",
+      nameStyle: "text-3xl font-bold leading-tight",
+      jobStyle: "text-sm",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "nature",
+    },
+  },
+
+  {
+    id: "beauty",
+    name: "Beauty",
+    category: "Beleza",
+    description: "Estética, moda e beleza com visual editorial.",
+    layoutType: "beauty",
+    defaults: {
+      primaryColor: "#C026D3",
+      textNameColor: "#701A75",
+      textJobColor: "#86198F",
+      textLocationColor: "#A21CAF",
+      primaryColorOpacity: 82,
+      usePrimaryColor: true,
+      backgroundOverlay: 0,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #fdf4ff 0%, #fae8ff 48%, #f5d0fe 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.75rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-4 border-fuchsia-200 shadow-xl",
+      nameStyle: "text-3xl font-bold leading-tight",
+      jobStyle: "text-sm uppercase tracking-wider",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-full",
+      headerStyle: "justify-between",
+      profileSize: "h-28 w-28",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "beauty",
+    },
+  },
+
+
+  {
+    id: "vidro-pro",
+    name: "Vidro Pro",
+    category: "Vidro",
+    description: "O estilo principal do sistema: vidro translúcido, foto desfocada e botões premium.",
+    layoutType: "glass-pro",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#F8FAFC",
+      textLocationColor: "#E2E8F0",
+      primaryColorOpacity: 16,
+      usePrimaryColor: true,
+      backgroundOverlay: 18,
+      backgroundBlur: 8,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #0f172a 0%, #334155 45%, #0ea5e9 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-white/80 shadow-2xl",
+      nameStyle: "text-[1.45rem] font-bold leading-tight tracking-[-0.02em]",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl border border-white/35 bg-white/10 shadow-lg backdrop-blur-2xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-2.5",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "glass-pro",
+    },
+  },
+
+  {
+    id: "vidro-frost",
+    name: "Vidro Frost",
+    category: "Vidro",
+    description: "Vidro claro e suave, inspirado em interfaces de vidro fosco.",
+    layoutType: "glass-frost",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#F8FAFC",
+      textLocationColor: "#E2E8F0",
+      primaryColorOpacity: 12,
+      usePrimaryColor: true,
+      backgroundOverlay: 10,
+      backgroundBlur: 12,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #475569 0%, #94a3b8 48%, #e2e8f0 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2.25rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-white/90 shadow-xl",
+      nameStyle: "text-[1.4rem] font-semibold leading-tight",
+      jobStyle: "text-sm",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-2xl border border-white/45 bg-white/15 shadow-md backdrop-blur-2xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "glass-frost",
+    },
+  },
+
+  {
+    id: "vidro-dark",
+    name: "Vidro Dark",
+    category: "Vidro",
+    description: "Vidro escuro com contraste forte e detalhes tecnológicos.",
+    layoutType: "glass-dark",
+    defaults: {
+      primaryColor: "#38BDF8",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#BAE6FD",
+      textLocationColor: "#CBD5E1",
+      primaryColorOpacity: 18,
+      usePrimaryColor: true,
+      backgroundOverlay: 38,
+      backgroundBlur: 7,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #020617 0%, #0f172a 48%, #164e63 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[1.75rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-cyan-200/80 shadow-2xl",
+      nameStyle: "text-[1.4rem] font-bold leading-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl border border-cyan-100/20 bg-slate-950/35 shadow-lg backdrop-blur-2xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-3",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "glass-dark",
+    },
+  },
+
+  {
+    id: "glass",
+    name: "Glass Clássico",
+    category: "Vidro",
+    description: "Vidro clássico com painel central, contraste limpo e profundidade controlada.",
+    layoutType: "glass",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#F8FAFC",
+      textLocationColor: "#E2E8F0",
+      primaryColorOpacity: 14,
+      usePrimaryColor: true,
+      backgroundOverlay: 20,
+      backgroundBlur: 5,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #111827 0%, #334155 52%, #475569 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2.2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-white/75 shadow-2xl",
+      nameStyle: "text-3xl font-bold leading-tight tracking-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl border border-white/30 bg-white/10 shadow-lg backdrop-blur-xl",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-2.5",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "glass",
+    },
+  },
+
+  {
+    id: "glass-clear",
+    name: "Vidro Total",
+    category: "Vidro",
+    description: "Vidro transparente e elegante, sem efeito de vidro fosco.",
+    layoutType: "glass-clear",
+    defaults: {
+      primaryColor: "#FFFFFF",
+      textNameColor: "#FFFFFF",
+      textJobColor: "#FFFFFF",
+      textLocationColor: "#F8FAFC",
+      primaryColorOpacity: 8,
+      usePrimaryColor: true,
+      backgroundOverlay: 12,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #0f172a 0%, #1e3a5f 50%, #0f766e 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-[2.2rem]",
+      contentStyle: "",
+      photoStyle: "rounded-full border-2 border-white/80 shadow-2xl",
+      nameStyle: "text-3xl font-bold leading-tight tracking-tight",
+      jobStyle: "text-sm font-medium",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-xl border border-white/40 bg-white/[0.06] shadow-lg",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-2.5",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "glass-clear",
+    },
+  },
+
+  {
+    id: "tech",
+    name: "Tech",
+    category: "Tecnologia",
+    description: "Futurista, digital e de alto contraste.",
+    layoutType: "tech",
+    defaults: {
+      primaryColor: "#22D3EE",
+      textNameColor: "#E0F2FE",
+      textJobColor: "#67E8F9",
+      textLocationColor: "#A5F3FC",
+      primaryColorOpacity: 70,
+      usePrimaryColor: true,
+      backgroundOverlay: 30,
+      backgroundBlur: 0,
+      showPhoto: true,
+      showBackground: true,
+    },
+    background: {
+      type: "gradient",
+      value: "linear-gradient(145deg, #020617 0%, #0f172a 45%, #164e63 100%)",
+    },
+    layout: {
+      cardRadius: "rounded-xl",
+      contentStyle: "",
+      photoStyle: "rounded-2xl border border-cyan-300/60",
+      nameStyle: "text-2xl font-bold leading-tight tracking-tight",
+      jobStyle: "text-xs uppercase tracking-[0.2em]",
+      locationStyle: "text-xs",
+      linksStyle: "",
+      buttonStyle: "rounded-lg",
+      headerStyle: "justify-between",
+      profileSize: "h-24 w-24",
+      contentSpacing: "space-y-2",
+      buttonHeight: "py-3",
+      buttonFont: "font-medium",
+      decoration: "tech",
+    },
+  },
+];
+
+export function getTemplateById(id: string): TemplateConfig {
+  return templates.find((template) => template.id === id) ?? templates[0];
+}
