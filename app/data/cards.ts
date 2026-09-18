@@ -3,6 +3,7 @@
 import { createElement, useEffect, useState } from "react";
 import DigitalCard from "../components/DigitalCard";
 
+
 type Link = { type: string; name: string; value: string };
 
 type CardClientProps = {
