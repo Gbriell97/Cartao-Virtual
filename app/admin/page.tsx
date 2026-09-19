@@ -106,9 +106,8 @@ export default function AdminPage() {
   const [slug, setSlug] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [slugStatus, setSlugStatus] = useState("");
-  const [publicUrl, setPublicUrl] = useState("");
   const [userId, setUserId] = useState("");
-  const [cards, setCards] = useState<any[]>([]);
+  const [cards, setCards] = useState<unknown[]>([]);
   const [selectedCardId, setSelectedCardId] = useState("");
   const [authChecking, setAuthChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -353,20 +352,16 @@ export default function AdminPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (slug) setPublicUrl(`${window.location.origin}/c/${slug}`);
-  }, [slug]);
-
   /* Verificação de disponibilidade do endereço (debounce 500ms). */
   useEffect(() => {
     const value = normalizeSlug(customSlug);
 
-    if (!value) {
-      setSlugStatus("");
-      return;
-    }
-
     const timer = setTimeout(async () => {
+      if (!value) {
+        setSlugStatus("");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("digital_cards")
         .select("id,slug")
@@ -1034,6 +1029,7 @@ export default function AdminPage() {
 
   const activeMeta = TAB_META[activeTab];
   const selectedTemplate = getTemplateById(template);
+  const publicUrl = slug ? `${window.location.origin}/c/${slug}` : "";
 
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-slate-100">
@@ -1401,7 +1397,7 @@ export default function AdminPage() {
                             Gostou do resultado no preview?
                           </p>
                           <p className="mt-1 text-xs leading-5 text-slate-300">
-                            "{pendingTemplate.name}" ficará salvo no dropdown
+                            &quot;{pendingTemplate.name}&quot; ficará salvo no dropdown
                             para reutilizar sempre.
                           </p>
                           <div className="mt-4 flex gap-2">
