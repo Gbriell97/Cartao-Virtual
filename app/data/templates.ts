@@ -70,6 +70,8 @@ export type TemplateConfig = {
     buttonHeight: string;
     buttonFont: string;
     decoration: string;
+    watermarkIcon?: string;
+
   };
 };
 
