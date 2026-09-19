@@ -18,6 +18,7 @@ import {
   FaStar,
   FaWifi,
   FaLink,
+  FaShoppingBag,
 } from "react-icons/fa";
 
 import { SiPix } from "react-icons/si";
@@ -48,6 +49,7 @@ type DigitalCardProps = {
 
   showPhoto?: boolean;
   showBackground?: boolean;
+  showLocation?: boolean;
 
   backgroundZoom?: number;
   backgroundOverlay?: number;
@@ -79,6 +81,9 @@ type DigitalCardProps = {
   textLocationColor?: string;
   primaryColorOpacity?: number;
   useTemplate?: boolean;
+  photoSize?: number;
+  photoShape?: "square" | "rounded" | "circle";
+  photoBorderColor?: string;
 };
 
 function getIcon(type: string) {
@@ -109,6 +114,9 @@ function getIcon(type: string) {
 
     case "menu":
       return <FaUtensils size={20} />;
+    
+    case "produtos":
+      return <FaShoppingBag size={20} />;
 
     case "review":
       return <FaStar size={20} />;
@@ -149,6 +157,7 @@ function getLinkUrl(link: Link) {
     case "review":
     case "wifi":
     case "custom":
+    case "produtos":
       return link.value;
 
     case "pix":
@@ -205,11 +214,15 @@ export default function DigitalCard({
   textLocationColor,
   primaryColorOpacity = 60,
   useTemplate = true,
+  photoSize,
+  photoShape,
+  photoBorderColor,
 }: DigitalCardProps) {
   const [showQRCode, setShowQRCode] = useState(false);
   const [copiedPixIndex, setCopiedPixIndex] = useState<number | null>(null);
 
   const templateConfig = getTemplateById(template);
+  const hasLocation = location.trim().length > 0;
   const currentTemplate = templateConfig.layout;
   const layoutType = templateConfig.layoutType;
 
@@ -233,6 +246,29 @@ export default function DigitalCard({
 
   const isCompactLayout =
   template === "executivo" || template === "motorista";
+
+  /* Sobrescritas da foto: inline style vence as classes do template. */
+  const photoRadius =
+    photoShape === "square"
+      ? "0px"
+      : photoShape === "rounded"
+        ? "18px"
+        : "9999px";
+
+  const photoOverrideStyle: React.CSSProperties | undefined =
+    photoSize !== undefined ||
+    photoShape !== undefined ||
+    photoBorderColor
+      ? {
+          width: photoSize,
+          height: photoSize,
+          borderRadius: photoRadius,
+          alignSelf: "center",
+          marginLeft: "auto",
+          marginRight: "auto",
+          ...(photoBorderColor ? { borderColor: photoBorderColor } : {}),
+        }
+      : undefined;
 
   const layoutStyles: Record<string, { container: string; profile: string }> = {
     modern: { container: "text-center", profile: "mt-2" },
@@ -438,7 +474,7 @@ export default function DigitalCard({
         <div className="px-6 py-7">
           <div className="flex items-center gap-5 rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-md">
             {shouldShowPhoto && (
-              <div className={`shrink-0 overflow-hidden shadow-xl ${currentTemplate.photoStyle} h-24 w-24`}>
+              <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-xl ${currentTemplate.photoStyle} h-24 w-24`}>
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
             )}
@@ -446,7 +482,9 @@ export default function DigitalCard({
               <div className="mb-2 h-1 w-12 rounded-full bg-white/70" />
               <h1 className={currentTemplate.nameStyle} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
               <p className={`mt-1 ${currentTemplate.jobStyle}`} style={{ color: finalJobColor, opacity: 0.82, fontSize: `${jobFontSize}px` }}>{job}</p>
-              <p className={`mt-2 ${currentTemplate.locationStyle}`} style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+              {hasLocation && (
+                <p className={`mt-2 ${currentTemplate.locationStyle}`} style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+              )}  
             </div>
           </div>
         </div>
@@ -458,7 +496,7 @@ export default function DigitalCard({
         <div className="px-6 py-5">
           <div className="flex items-center gap-5">
             {shouldShowPhoto && (
-              <div className={`shrink-0 overflow-hidden shadow-2xl ${currentTemplate.photoStyle} h-28 w-28`}>
+              <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-2xl ${currentTemplate.photoStyle} h-28 w-28`}>
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
             )}
@@ -466,7 +504,8 @@ export default function DigitalCard({
               <p className="mb-1 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: textColor, opacity: 0.65 }}>Atendimento</p>
               <h1 className={currentTemplate.nameStyle} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
               <p className={`mt-1 ${currentTemplate.jobStyle}`} style={{ color: finalJobColor, fontSize: `${jobFontSize}px` }}>{job}</p>
-              <p className="mt-2 text-sm font-medium" style={{ color: finalLocationColor, opacity: 0.7, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+               {hasLocation && (
+              <p className="mt-2 text-sm font-medium" style={{ color: finalLocationColor, opacity: 0.7, fontSize: `${locationFontSize}px` }}>📍 {location}</p>)}
             </div>
           </div>
           <div className="mt-5 h-1 w-full rounded-full bg-white/20">
@@ -476,32 +515,12 @@ export default function DigitalCard({
       );
     }
 
-    if (["glass", "glass-pro", "glass-frost", "glass-dark"].includes(template)) {
-      const glassButton = template === "glass-dark"
-        ? "rounded-xl border border-cyan-100/20 bg-slate-950/35 shadow-lg backdrop-blur-2xl"
-        : template === "glass-frost"
-          ? "rounded-2xl border border-white/45 bg-white/15 shadow-md backdrop-blur-2xl"
-          : "rounded-xl border border-white/35 bg-white/10 shadow-lg backdrop-blur-2xl";
-      return (
-        <div className="space-y-2.5 px-5 pb-6 sm:px-6">
-          {links.map((link, index) =>
-            renderLinkItem(
-              link,
-              index,
-              `min-h-[44px] ${templateConfig.layout.buttonFont} text-center transition duration-200 hover:scale-[1.015] ${glassButton}`,
-              "justify-center px-4"
-            )
-          )}
-        </div>
-      );
-    }
-
     if (template === "advocacia") {
       return (
         <div className="px-6 py-7 text-center">
           <div className="mx-auto mb-5 h-px w-24 bg-yellow-500/70" />
           {shouldShowPhoto && (
-            <div className="mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-yellow-500/70 p-1 shadow-xl">
+            <div style={photoOverrideStyle} className="mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-yellow-500/70 p-1 shadow-xl">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
@@ -512,7 +531,9 @@ export default function DigitalCard({
             <h1 className={currentTemplate.nameStyle} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
             <div className="mx-auto mt-3 h-px w-16 bg-yellow-500/60" />
             <p className={`mt-3 ${currentTemplate.jobStyle}`} style={{ color: finalJobColor, opacity: 0.82, fontSize: `${jobFontSize}px` }}>{job}</p>
-            <p className="mt-2 text-sm" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+            {hasLocation && (
+              <p className="mt-2 text-sm" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+            )}
           </div>
         </div>
       );
@@ -528,16 +549,18 @@ export default function DigitalCard({
         <div className="px-5 py-5 sm:px-6 sm:py-6 text-center">
           <div className={`mx-auto max-w-[92%] rounded-[1.7rem] border p-5 shadow-2xl backdrop-blur-2xl ${glassProfileClass}`}>
             {shouldShowPhoto && (
-              <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border-2 border-white/80 bg-white/10 p-0.5 shadow-2xl">
+              <div style={photoOverrideStyle} className="mx-auto h-24 w-24 overflow-hidden rounded-full border-2 border-white/80 bg-white/10 p-0.5 shadow-2xl">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full rounded-full object-cover" />
               </div>
             )}
             <h1 className={`mt-4 ${adaptiveNameClass} font-bold break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
             <p className={`mt-1 ${adaptiveJobClass}`} style={{ color: finalJobColor, opacity: 0.88, fontSize: `${jobFontSize}px` }}>{job}</p>
-            <div className="mx-auto mt-3 flex w-fit max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs backdrop-blur-xl" style={{ color: finalLocationColor, fontSize: `${locationFontSize}px` }}>
-              <FaMapMarkerAlt size={11} />
-              <span className="truncate">{location}</span>
-            </div>
+            {hasLocation && (
+              <div className="mx-auto mt-3 flex w-fit max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs backdrop-blur-xl" style={{ color: finalLocationColor, fontSize: `${locationFontSize}px` }}>
+                <FaMapMarkerAlt size={11} />
+                <span className="truncate">{location}</span>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -546,14 +569,16 @@ export default function DigitalCard({
     return (
       <div className={profileRowClass}>
         {shouldShowPhoto && (
-          <div className={`shrink-0 overflow-hidden shadow-lg ${currentTemplate.photoStyle} ${templateConfig.layout.profileSize} ${isCompactLayout ? "" : currentLayout.profile}`}>
+          <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-lg ${currentTemplate.photoStyle} ${templateConfig.layout.profileSize} ${isCompactLayout ? "" : currentLayout.profile}`}>
             <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
           </div>
         )}
         <div className={isCompactLayout && shouldShowPhoto ? "min-w-0 flex-1 text-left" : `${currentLayout.container} min-w-0`}>
           <h1 className={currentTemplate.nameStyle} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
           <p className={`mt-1 ${currentTemplate.jobStyle}`} style={{ color: finalJobColor, opacity: 0.8, fontSize: `${jobFontSize}px` }}>{job}</p>
-          <p className={`mt-2 ${currentTemplate.locationStyle}`} style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+          {hasLocation && (
+            <p className={`mt-2 ${currentTemplate.locationStyle}`} style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+          )}
         </div>
       </div>
     );
@@ -567,7 +592,7 @@ export default function DigitalCard({
           <div className="rounded-3xl border border-white/20 bg-blue-950/35 p-6 backdrop-blur-md">
             <div className="flex items-center gap-4">
               {shouldShowPhoto && (
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/30 shadow-xl">
+                <div style={photoOverrideStyle} className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/30 shadow-xl">
                   <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
                 </div>
               )}
@@ -581,10 +606,12 @@ export default function DigitalCard({
                 <p className={`mt-1 ${adaptiveJobClass} font-medium`} style={{ color: finalJobColor, opacity: 0.82, fontSize: `${jobFontSize}px` }}>{job}</p>
               </div>
             </div>
-            <div className="mt-5 flex items-center gap-2 border-t border-white/15 pt-4 text-sm" style={{ color: finalLocationColor, opacity: 0.7, fontSize: `${locationFontSize}px` }}>
-              <FaMapMarkerAlt size={14} />
-              <span>{location}</span>
-            </div>
+            {hasLocation && (
+              <div className="mt-5 flex items-center gap-2 border-t border-white/15 pt-4 text-sm" style={{ color: finalLocationColor, opacity: 0.7, fontSize: `${locationFontSize}px` }}>
+                <FaMapMarkerAlt size={14} />
+                <span>{location}</span>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -594,7 +621,7 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-6 text-center">
           {shouldShowPhoto && (
-            <div className="relative mx-auto h-28 w-28">
+              <div style={photoOverrideStyle} className="relative mx-auto h-28 w-28">
               <div className="absolute inset-0 rounded-full bg-pink-400/30 blur-xl" />
               <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white/70 shadow-2xl">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
@@ -603,10 +630,12 @@ export default function DigitalCard({
           )}
           <h1 className={`mt-5 ${adaptiveNameClass} font-bold break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
           <p className={`mt-1 ${adaptiveJobClass} font-medium`} style={{ color: finalJobColor, opacity: 0.82, fontSize: `${jobFontSize}px` }}>{job}</p>
-          <div className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs backdrop-blur-sm" style={{ color: finalLocationColor, opacity: 0.75, fontSize: `${locationFontSize}px` }}>
-            <FaMapMarkerAlt size={11} />
-            {location}
-          </div>
+          {hasLocation && (
+            <div className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs backdrop-blur-sm" style={{ color: finalLocationColor, opacity: 0.75, fontSize: `${locationFontSize}px` }}>
+              <FaMapMarkerAlt size={11} />
+              {location}
+            </div>
+          )}
         </div>
       );
     }
@@ -616,7 +645,7 @@ export default function DigitalCard({
         <div className="px-6 py-7 text-center">
           <p className="text-xs uppercase tracking-[0.4em]" style={{ color: textColor, opacity: 0.65 }}>É um prazer ter você aqui</p>
           {shouldShowPhoto && (
-            <div className="mx-auto mt-5 h-28 w-28 overflow-hidden rounded-full border-4 border-white/60 shadow-2xl">
+            <div style={photoOverrideStyle} className="mx-auto mt-5 h-28 w-28 overflow-hidden rounded-full border-4 border-white/60 shadow-2xl">
               <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
             </div>
           )}
@@ -627,7 +656,9 @@ export default function DigitalCard({
             <span className="h-px w-8 bg-white/40" />
           </div>
           <p className={`mt-3 ${adaptiveJobClass} italic`} style={{ color: finalJobColor, opacity: 0.8, fontSize: `${jobFontSize}px` }}>{job}</p>
-          <p className="mt-2 text-xs" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>{location}</p>
+          {hasLocation && (
+            <p className="mt-2 text-xs" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>{location}</p>
+          )}
         </div>
       );
     }
@@ -638,15 +669,17 @@ export default function DigitalCard({
           <div className="absolute left-4 top-2 text-4xl opacity-50">🌸</div>
           <div className="absolute right-4 top-2 text-4xl opacity-50">🌺</div>
           {shouldShowPhoto && (
-            <div className="mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-pink-200/80 shadow-xl">
+            <div style={photoOverrideStyle} className="mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-pink-200/80 shadow-xl">
               <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
             </div>
           )}
           <h1 className={`mt-5 ${adaptiveNameClass} font-bold break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
           <p className={`mt-1 ${adaptiveJobClass} font-medium`} style={{ color: finalJobColor, opacity: 0.75, fontSize: `${jobFontSize}px` }}>{job}</p>
-          <div className="mx-auto mt-4 flex items-center justify-center gap-2" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>
-            <span>❀</span><span className="text-xs">{location}</span><span>❀</span>
-          </div>
+          {hasLocation && (
+            <div className="mx-auto mt-4 flex items-center justify-center gap-2" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>
+              <span>❀</span><span className="text-xs">{location}</span><span>❀</span>
+            </div>
+          )}
         </div>
       );
     }
@@ -656,7 +689,7 @@ export default function DigitalCard({
         <div className="px-6 py-6">
           <div className="flex items-center gap-5">
             {shouldShowPhoto && (
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-emerald-300/50 shadow-xl">
+              <div style={photoOverrideStyle} className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-emerald-300/50 shadow-xl">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
             )}
@@ -664,7 +697,9 @@ export default function DigitalCard({
               <div className="mb-2 h-1 w-10 rounded-full bg-emerald-300/80" />
               <h1 className={`${adaptiveNameClass} font-bold break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
               <p className={`mt-1 ${adaptiveJobClass}`} style={{ color: finalJobColor, opacity: 0.8, fontSize: `${jobFontSize}px` }}>{job}</p>
-              <p className="mt-2 text-xs" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+              {hasLocation && (
+                <p className="mt-2 text-xs" style={{ color: finalLocationColor, opacity: 0.65, fontSize: `${locationFontSize}px` }}>📍 {location}</p>
+              )}
             </div>
           </div>
         </div>
@@ -677,7 +712,7 @@ export default function DigitalCard({
           <div className="rounded-2xl bg-white/80 p-5 shadow-xl backdrop-blur-md">
             <div className="flex items-center gap-4">
               {shouldShowPhoto && (
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-cyan-200 shadow-md">
+                <div style={photoOverrideStyle} className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-cyan-200 shadow-md">
                   <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
                 </div>
               )}
@@ -698,12 +733,14 @@ export default function DigitalCard({
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 border-t border-cyan-100 pt-3 text-sm text-slate-500"
-              style={{ fontSize: `${locationFontSize}px` }}
-            >
-              <FaMapMarkerAlt size={13} />
-              <span>{location}</span>
-            </div>
+            {hasLocation && (
+              <div className="mt-4 flex items-center gap-2 border-t border-cyan-100 pt-3 text-sm text-slate-500"
+                style={{ fontSize: `${locationFontSize}px` }}
+              >
+                <FaMapMarkerAlt size={13} />
+                <span>{location}</span>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -764,7 +801,7 @@ export default function DigitalCard({
   function renderLinks() {
     if (template === "motorista") {
       return (
-        <div className="space-y-3 px-6 pb-7">
+        <div className="min-h-0 flex-1 touch-pan-y space-y-3 overflow-y-auto px-6 pb-7 [&::-webkit-scrollbar]:hidden">
           {links.map((link, index) =>
             renderLinkItem(link, index, "rounded-xl border-2 px-3 py-3 sm:px-4 sm:py-4 font-bold uppercase tracking-wide transition hover:scale-[1.02]", "justify-start")
           )}
@@ -774,7 +811,7 @@ export default function DigitalCard({
 
     if (template === "advocacia") {
       return (
-        <div className="space-y-2 px-6 pb-7">
+        <div className="min-h-0 flex-1 touch-pan-y space-y-2 overflow-y-auto px-6 pb-7 [&::-webkit-scrollbar]:hidden">
           {links.map((link, index) =>
             renderLinkItem(link, index, "border-b border-yellow-600/40 py-3 text-center font-serif transition hover:bg-white/5", "justify-center")
           )}
@@ -783,7 +820,9 @@ export default function DigitalCard({
     }
 
     return (
-      <div className={`${templateConfig.layout.contentSpacing} px-6 pb-6`}>
+      <div
+        className={`${templateConfig.layout.contentSpacing} min-h-0 flex-1 touch-pan-y overflow-y-auto px-6 pb-6 [&::-webkit-scrollbar]:hidden`}
+      >
         {links.map((link, index) =>
           renderLinkItem(
             link,
@@ -838,12 +877,23 @@ export default function DigitalCard({
                   : templateConfig.background.type === "gradient"
                     ? templateConfig.background.value
                     : `url(${templateConfig.background.value})`,
-              backgroundPosition: `calc(50% + ${backgroundPosition.x}px) calc(50% + ${backgroundPosition.y}px)`,
-              backgroundSize: `${backgroundZoom * 100}%`,
+               backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
               // O blur precisa ser aplicado diretamente na camada da imagem.
               // A escala evita que as bordas desfocadas revelem áreas transparentes.
-              filter: effectiveBackgroundBlur > 0 ? `blur(${effectiveBackgroundBlur}px)` : "none",
-              transform: effectiveBackgroundBlur > 0 ? "scale(1.12)" : "scale(1)",
+              filter:
+                effectiveBackgroundBlur > 0
+                  ? `blur(${effectiveBackgroundBlur}px)`
+                  : "none",
+              /* A imagem sempre cobre a tela inteira. O pan só tem efeito
+                 quando ampliada (zoom > 1) e o editor limita o deslocamento
+                 para nunca revelar bordas vazias. */
+              transform: `scale(${
+                (effectiveBackgroundBlur > 0 ? 1.12 : 1) * backgroundZoom
+              }) translate(${-backgroundPosition.x / backgroundZoom}px, ${
+                -backgroundPosition.y / backgroundZoom
+              }px)`,
               transformOrigin: "center center",
               willChange: "filter, transform",
             }}
@@ -913,9 +963,12 @@ export default function DigitalCard({
 
         {/* Modal QR Code */}
         {showQRCode && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
+          <div
+          onPointerDown={(e) => e.stopPropagation()} 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
             <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
               <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setShowQRCode(false)}
                 className="absolute right-4 top-4 text-2xl text-gray-500 transition hover:text-gray-900"
                 aria-label="Fechar QR Code"
