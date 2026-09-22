@@ -109,6 +109,7 @@ type DigitalCardProps = {
 
   isEditing?: boolean;
   template?: string;
+  customTemplate?: any;
   usePrimaryColor?: boolean;
 
   primaryColor?: string;
@@ -242,7 +243,7 @@ export default function DigitalCard({
   onBackgroundPointerMove,
   onBackgroundPointerUp,
   isEditing = false,
-  template = "rosa",
+  template = "azul",
   usePrimaryColor = false,
   primaryColor = "#FFFFFF",
   textColor = "#FFFFFF",
@@ -251,6 +252,7 @@ export default function DigitalCard({
   textLocationColor,
   primaryColorOpacity = 60,
   useTemplate = true,
+  customTemplate,
   photoSize,
   photoShape,
   photoBorderColor,
@@ -258,7 +260,7 @@ export default function DigitalCard({
   const [showQRCode, setShowQRCode] = useState(false);
   const [copiedPixIndex, setCopiedPixIndex] = useState<number | null>(null);
 
-  const templateConfig = getTemplateById(template);
+  const templateConfig = customTemplate || getTemplateById(template);
   const hasLocation = location.trim().length > 0;
   const currentTemplate = templateConfig.layout;
   const layoutType = templateConfig.layoutType;
@@ -339,7 +341,7 @@ export default function DigitalCard({
    *
    * Os demais templates continuam com foto acima das informações.
    */
-  const profileRowClass = isCompactLayout && shouldShowPhoto
+  const profileRowClass = isCompactLayout && shouldShowPhoto && photo
     ? "flex flex-row items-center gap-5 px-6 py-6"
     : "flex flex-col items-center px-6 py-5";
 
@@ -510,9 +512,17 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-7">
           <div className="flex items-center gap-5 rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-md">
-            {shouldShowPhoto && (
+            {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-xl ${currentTemplate.photoStyle} h-24 w-24`}>
-                <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
+                {showPhoto && photo && (
+                  <img
+                    src={photo}
+                    alt={`Foto de ${name}`}
+                    width={112}
+                    height={112}
+                  />
+                )} className="h-full w-full object-cover" 
+                /&gt;
               </div>
             )}
             <div className="min-w-0 flex-1 text-left">
@@ -532,7 +542,7 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-5">
           <div className="flex items-center gap-5">
-            {shouldShowPhoto && (
+            {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-2xl ${currentTemplate.photoStyle} h-28 w-28`}>
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
@@ -556,7 +566,7 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-7 text-center">
           <div className="mx-auto mb-5 h-px w-24 bg-yellow-500/70" />
-          {shouldShowPhoto && (
+          {shouldShowPhoto && photo && (
             <div style={photoOverrideStyle} className="mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-yellow-500/70 p-1 shadow-xl">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
@@ -585,7 +595,7 @@ export default function DigitalCard({
       return (
         <div className="px-5 py-5 sm:px-6 sm:py-6 text-center">
           <div className={`mx-auto max-w-[92%] rounded-[1.7rem] border p-5 shadow-2xl backdrop-blur-2xl ${glassProfileClass}`}>
-            {shouldShowPhoto && (
+            {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className="mx-auto h-24 w-24 overflow-hidden rounded-full border-2 border-white/80 bg-white/10 p-0.5 shadow-2xl">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full rounded-full object-cover" />
               </div>
@@ -605,12 +615,12 @@ export default function DigitalCard({
 
     return (
       <div className={profileRowClass}>
-        {shouldShowPhoto && (
+        {shouldShowPhoto && photo && (
           <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-lg ${currentTemplate.photoStyle} ${templateConfig.layout.profileSize} ${isCompactLayout ? "" : currentLayout.profile}`}>
             <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
           </div>
         )}
-        <div className={isCompactLayout && shouldShowPhoto ? "min-w-0 flex-1 text-left" : `${currentLayout.container} min-w-0`}>
+        <div className={isCompactLayout && shouldShowPhoto && photo ? "min-w-0 flex-1 text-left" : `${currentLayout.container} min-w-0`}>
           <h1 className={currentTemplate.nameStyle} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
           <p className={`mt-1 ${currentTemplate.jobStyle}`} style={{ color: finalJobColor, opacity: 0.8, fontSize: `${jobFontSize}px` }}>{job}</p>
           {hasLocation && (
@@ -628,7 +638,7 @@ export default function DigitalCard({
         <div className="px-6 py-6">
           <div className="rounded-3xl border border-white/20 bg-blue-950/35 p-6 backdrop-blur-md">
             <div className="flex items-center gap-4">
-              {shouldShowPhoto && (
+              {shouldShowPhoto && photo && (
                 <div style={photoOverrideStyle} className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/30 shadow-xl">
                   <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
                 </div>
@@ -657,7 +667,7 @@ export default function DigitalCard({
     if (template === "rosa") {
       return (
         <div className="px-6 py-6 text-center">
-          {shouldShowPhoto && (
+          {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className="relative mx-auto h-28 w-28">
               <div className="absolute inset-0 rounded-full bg-pink-400/30 blur-xl" />
               <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white/70 shadow-2xl">
@@ -681,7 +691,7 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-7 text-center">
           <p className="text-xs uppercase tracking-[0.4em]" style={{ color: textColor, opacity: 0.65 }}>É um prazer ter você aqui</p>
-          {shouldShowPhoto && (
+          {shouldShowPhoto && photo && (
             <div style={photoOverrideStyle} className="mx-auto mt-5 h-28 w-28 overflow-hidden rounded-full border-4 border-white/60 shadow-2xl">
               <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
             </div>
@@ -705,7 +715,7 @@ export default function DigitalCard({
         <div className="relative px-6 py-7 text-center">
           <div className="absolute left-4 top-2 text-4xl opacity-50">🌸</div>
           <div className="absolute right-4 top-2 text-4xl opacity-50">🌺</div>
-          {shouldShowPhoto && (
+          {shouldShowPhoto && photo && (
             <div style={photoOverrideStyle} className="mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-pink-200/80 shadow-xl">
               <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
             </div>
@@ -725,7 +735,7 @@ export default function DigitalCard({
       return (
         <div className="px-6 py-6">
           <div className="flex items-center gap-5">
-            {shouldShowPhoto && (
+            {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-emerald-300/50 shadow-xl">
                 <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
@@ -748,7 +758,7 @@ export default function DigitalCard({
         <div className="px-6 py-6">
           <div className="rounded-2xl bg-white/80 p-5 shadow-xl backdrop-blur-md">
             <div className="flex items-center gap-4">
-              {shouldShowPhoto && (
+              {shouldShowPhoto && photo && (
                 <div style={photoOverrideStyle} className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-cyan-200 shadow-md">
                   <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
                 </div>
@@ -895,9 +905,10 @@ export default function DigitalCard({
         {renderDecoration()}
 
         {/* Fundo */}
+    
         <div
           className="absolute inset-0"
-          style={{ backgroundColor }}
+          style={{ backgroundColor, opacity: 1, }}
         />
 
         {shouldShowBackground && backgroundMode !== "color" && (

@@ -12,7 +12,7 @@ export default async function CardPage({ params }: PageProps) {
 
   const { data, error } = await supabase
     .from("digital_cards")
-    .select("data")
+    .select("data,user_id")
     .eq("slug", slug)
     .single();
 
@@ -21,6 +21,8 @@ export default async function CardPage({ params }: PageProps) {
   }
 
   const card = data.data;
+
+  const customTemplate = card.templateData || null;
 
   return (
     <CardClient
@@ -38,6 +40,7 @@ export default async function CardPage({ params }: PageProps) {
       backgroundOverlay={card.backgroundOverlay}
       backgroundBlur={card.backgroundBlur}
       template={card.template}
+      customTemplate={customTemplate}
       usePrimaryColor={card.usePrimaryColor}
       primaryColor={card.primaryColor}
       textColor={card.textColor}

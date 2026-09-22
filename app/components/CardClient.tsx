@@ -29,6 +29,7 @@ type CardClientProps = {
   showPhoto?: boolean;
   showBackground?: boolean;
   template?: string;
+  customTemplate?: any;
   useTemplate?: boolean;
   usePrimaryColor?: boolean;
   primaryColor?: string;
@@ -65,5 +66,5 @@ export default function CardClient(props: CardClientProps) {
     ...props,
   };
 
-  return <DigitalCard {...cardData} slug={props.slug} />;
+  return <DigitalCard {...cardData} customTemplate={props.customTemplate} slug={props.slug} />;
 }

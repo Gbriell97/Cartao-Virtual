@@ -92,12 +92,20 @@ type CardLink = {
   enabled: boolean;
 };
 
+type DigitalCardRecord = {
+  id: string;
+  slug: string;
+  data: Record<string, any>;
+};
+
 /* ------------------------------------------------------------------ */
 /* Componente                                                          */
 /* ------------------------------------------------------------------ */
 
 export default function AdminPage() {
+  const [activeSection, setActiveSection] = useState<"editor" | "cards" | "ia" | "admin">("editor");
   const [activeTab, setActiveTab] = useState<TabId>("templates");
+  const [editorExpanded, setEditorExpanded] = useState(false);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState(false);
 
   const [name, setName] = useState("João Henrique");
@@ -107,13 +115,17 @@ export default function AdminPage() {
   const [customSlug, setCustomSlug] = useState("");
   const [slugStatus, setSlugStatus] = useState("");
   const [userId, setUserId] = useState("");
-  const [cards, setCards] = useState<unknown[]>([]);
+  const [cards, setCards] = useState<DigitalCardRecord[]>([]);
   const [selectedCardId, setSelectedCardId] = useState("");
+  const [maxCards, setMaxCards] = useState(1);
+  const [users, setUsers] = useState<any[]>([]);
+  const selectedCard = cards.find((card) => card.id === selectedCardId);
   const [authChecking, setAuthChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
 
   /* Cores e tipografia */
   const [primaryColor, setPrimaryColor] = useState("#FFFFFF");
@@ -135,7 +147,7 @@ export default function AdminPage() {
   
 
   /* Mídia */
-  const [photo, setPhoto] = useState("/images/perfil.jpg");
+  const [photo, setPhoto] = useState("");
   const [background, setBackground] = useState("/images/fundo.jpg");
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [backgroundMode, setBackgroundMode] = useState<
@@ -257,11 +269,21 @@ export default function AdminPage() {
 
         const { data: profile } = await supabase
           .from("user_profiles")
-          .select("role")
+          .select("role,max_cards")
           .eq("id", user.id)
           .maybeSingle();
 
         setIsAdmin(profile?.role === "admin");
+        setMaxCards(profile?.max_cards ?? 1);
+
+          if (profile?.role === "admin") {
+            try {
+              const data = await adminRequest({ action: "list_users" });
+              setUsers(data.users || []);
+            } catch (error) {
+              console.error("Erro ao carregar usuários:", error);
+            }
+          }
       
 
         const { data: userCards, error } = await supabase
@@ -306,8 +328,8 @@ export default function AdminPage() {
         setUsePrimaryColor(cardData.usePrimaryColor ?? false);
         setTemplate(cardData.template || "rosa");
         setUseTemplate(cardData.useTemplate ?? true);
-        setPhoto(cardData.photo || "/images/perfil.jpg");
-        setBackground(cardData.background || "/images/fundo.jpg");
+        setPhoto(cardData.photo || "");
+        setBackground(cardData.background || "");
         setBackgroundColor(cardData.backgroundColor || "#FFFFFF");
         setBackgroundMode(cardData.backgroundMode || "template");
         setBackgroundPosition(cardData.backgroundPosition || { x: 0, y: 0 });
@@ -404,6 +426,125 @@ export default function AdminPage() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [templateDropdownOpen]);
+
+    function loadCard(card: any) {
+        const cardData = card.data || {};
+
+        setSelectedCardId(card.id);
+        setSlug(card.slug || "");
+        setCustomSlug(card.slug || "");
+        setName(cardData.name || "");
+        setJob(cardData.job || "");
+        setLocation(cardData.location || "");
+        setPrimaryColor(cardData.primaryColor || "#111827");
+        setPrimaryColorOpacity(cardData.primaryColorOpacity ?? 60);
+        setTextColor(cardData.textColor || "#FFFFFF");
+        setTextNameColor(cardData.textNameColor || "#FFFFFF");
+        setTextJobColor(cardData.textJobColor || "#FFFFFF");
+        setTextLocationColor(cardData.textLocationColor || "#FFFFFF");
+        setNameFontSize(cardData.nameFontSize ?? 30);
+        setJobFontSize(cardData.jobFontSize ?? 16);
+        setLocationFontSize(cardData.locationFontSize ?? 14);
+        setHealthLabel(cardData.healthLabel || "Profissional de saúde");
+        setShowPhoto(cardData.showPhoto ?? true);
+        setShowBackground(cardData.showBackground ?? true);
+        setUsePrimaryColor(cardData.usePrimaryColor ?? false);
+        setTemplate(cardData.template || "rosa");
+        setUseTemplate(cardData.useTemplate ?? true);
+        setPhoto(cardData.photo || "");
+        setBackground(cardData.background || "/images/fundo.jpg");
+        setBackgroundColor(cardData.backgroundColor || "#FFFFFF");
+        setBackgroundMode(cardData.backgroundMode || "template");
+        setBackgroundPosition(cardData.backgroundPosition || { x: 0, y: 0 });
+        setBackgroundZoom(cardData.backgroundZoom ?? 1);
+        setBackgroundOverlay(cardData.backgroundOverlay ?? 40);
+        setBackgroundBlur(cardData.backgroundBlur ?? 8);
+        setPosition(cardData.position || { x: 0, y: 0 });
+        setZoom(cardData.zoom ?? 1);
+        setPhotoSize(cardData.photoSize ?? 112);
+        setPhotoShape(cardData.photoShape || "circle");
+        setPhotoBorderColor(cardData.photoBorderColor || "");
+        setUsePhotoBorderColor(cardData.usePhotoBorderColor ?? false);
+        setLinks(
+          (cardData.links || []).map((link: CardLink, index: number) => ({
+            ...link,
+            enabled: link.enabled ?? true,
+            id: link.id || `link-${index}-${Date.now()}`,
+          }))
+        );
+    }
+
+    async function createNewCard() {
+  if (cards.length >= maxCards) {
+    alert(`Você pode criar no máximo ${maxCards} cartão(ões).`);
+    return;
+  }
+
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData.user;
+
+  if (!user) {
+    alert("Usuário não autenticado.");
+    return;
+  }
+
+  const newCardData = {
+    name: "Novo cartão",
+    job: "",
+    location: "",
+    primaryColor: "#111827",
+    primaryColorOpacity: 60,
+    textColor: "#FFFFFF",
+    textNameColor: "#FFFFFF",
+    textJobColor: "#FFFFFF",
+    textLocationColor: "#FFFFFF",
+    nameFontSize: 30,
+    jobFontSize: 16,
+    locationFontSize: 14,
+    healthLabel: "Profissional de saúde",
+    showPhoto: true,
+    showBackground: true,
+    usePrimaryColor: false,
+    template: "rosa",
+    useTemplate: true,
+    photo: "",
+    background: "/images/fundo.jpg",
+    backgroundColor: "#FFFFFF",
+    backgroundMode: "template",
+    backgroundPosition: { x: 0, y: 0 },
+    backgroundZoom: 1,
+    backgroundOverlay: 40,
+    backgroundBlur: 8,
+    position: { x: 0, y: 0 },
+    zoom: 1,
+    photoSize: 112,
+    photoShape: "circle",
+    photoBorderColor: "",
+    usePhotoBorderColor: false,
+    links: [],
+  };
+
+  const newSlug = `novo-cartao-${Date.now()}`;
+
+  const { data: newCard, error } = await supabase
+    .from("digital_cards")
+    .insert({
+      slug: newSlug,
+      user_id: user.id,
+      data: newCardData,
+    })
+    .select("id,data,slug")
+    .single();
+
+  if (error || !newCard) {
+    console.error("Erro ao criar cartão:", error);
+    alert("Não foi possível criar o novo cartão.");
+    return;
+  }
+
+  setCards((currentCards) => [...currentCards, newCard]);
+  loadCard(newCard);
+}
 
   /* ---------------------------------------------------------------- */
   /* Handlers de arraste do fundo                                      */
@@ -873,6 +1014,96 @@ export default function AdminPage() {
     setPendingTemplate(null);
   }
 
+  async function adminRequest(payload: Record<string, unknown>) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token ?? ""}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro na operação.");
+    return data;
+  }
+
+  async function refreshUsers() {
+    try {
+      const data = await adminRequest({ action: "list_users" });
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error("Erro ao carregar usuários:", error);
+    }
+  }
+
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+    maxCards: 1,
+  });
+  const [creatingUser, setCreatingUser] = useState(false);
+
+  async function createUser() {
+    if (!newUser.name || !newUser.email || !newUser.password) {
+      alert("Preencha nome, e-mail e senha.");
+      return;
+    }
+    setCreatingUser(true);
+    try {
+      await adminRequest({ action: "create_user", ...newUser });
+      await refreshUsers();
+      setNewUser({ name: "", email: "", password: "", role: "user", maxCards: 1 });
+      alert("Usuário criado com sucesso!");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao criar usuário.");
+    } finally {
+      setCreatingUser(false);
+    }
+  }
+
+  async function deleteUser(targetUserId: string, userName: string) {
+    if (!confirm(`Excluir o usuário "${userName}"? Essa ação não pode ser desfeita.`)) return;
+    try {
+      await adminRequest({ action: "delete_user", userId: targetUserId });
+      await refreshUsers();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao excluir.");
+    }
+  }
+
+  async function resetPassword(targetUserId: string) {
+    const password = prompt("Digite a nova senha (mínimo 6 caracteres):");
+    if (!password) return;
+    if (password.length < 6) {
+      alert("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    try {
+      await adminRequest({ action: "reset_password", userId: targetUserId, password });
+      alert("Senha alterada com sucesso!");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao alterar senha.");
+    }
+  }
+
+  async function changeMaxCards(targetUserId: string, maxCards: number) {
+    try {
+      await adminRequest({ action: "set_max_cards", userId: targetUserId, maxCards });
+      await refreshUsers();
+      if (targetUserId === userId) setMaxCards(maxCards);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao alterar limite.");
+    }
+  }
+
   async function saveCard() {
     setIsSaving(true);
 
@@ -896,7 +1127,8 @@ export default function AdminPage() {
 
     const { data: existingCard, error: findError } = await supabase
       .from("digital_cards")
-      .select("id, slug")
+      .select("id,slug")
+      .eq("id", selectedCardId)
       .eq("user_id", currentUserId)
       .maybeSingle();
 
@@ -946,6 +1178,7 @@ export default function AdminPage() {
     const cardData = {
       slug: finalSlug,
       user_id: currentUserId,
+      templateData: templates.find((item) => item.id === template) || null,
       name,
       job,
       location,
@@ -991,7 +1224,7 @@ export default function AdminPage() {
             data: cardData,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", existingCard.id)
+          .eq("id", selectedCardId)
       : await supabase.from("digital_cards").insert({
           slug: finalSlug,
           user_id: currentUserId,
@@ -1002,14 +1235,26 @@ export default function AdminPage() {
     setIsSaving(false);
 
     if (error) {
-      console.error("Erro ao salvar no Supabase:", error);
-      alert(
-        "Houve um erro ao salvar no Supabase. Tente novamente."
-      );
-      return;
-    }
+  console.error("Erro ao salvar no Supabase:", error);
+  alert(
+    "Houve um erro ao salvar no Supabase. Tente novamente."
+  );
+  return;
+}
 
-    alert("Alterações salvas com sucesso!");
+setCards((currentCards) =>
+  currentCards.map((card) =>
+    card.id === selectedCardId
+      ? {
+          ...card,
+          slug: finalSlug,
+          data: cardData,
+        }
+      : card
+  )
+);
+
+alert("Alterações salvas com sucesso!");
   }
 
   /* ---------------------------------------------------------------- */
@@ -1034,6 +1279,8 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-slate-100">
       <div className="flex min-h-screen">
+
+
         {/* ===================== SIDEBAR (desktop) ===================== */}
         <aside className="sticky top-0 hidden h-screen w-[288px] shrink-0 flex-col border-r border-white/[0.06] bg-gradient-to-b from-[#0d1522] to-[#0a111d] lg:flex">
           {/* Cabeçalho */}
@@ -1064,38 +1311,115 @@ export default function AdminPage() {
 
           {/* Navegação */}
           <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            {TABS.map((item) => {
-              const Icon = item.icon;
-              const active = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveTab(item.id)}
-                  className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${
-                    active
-                      ? "bg-white/[0.08] font-semibold text-white ring-1 ring-white/10"
-                      : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
-                  }`}
-                >
-                  {active && (
-                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-sky-400 to-blue-500" />
-                  )}
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-                      active
-                        ? "bg-sky-400/15 text-sky-300"
-                        : "bg-white/[0.05] text-slate-400 group-hover:text-slate-300"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
+            {/* Assistente IA */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("ia");
+                setActiveTab("ia");
+              }}
+              className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${
+                activeSection === "ia"
+                  ? "bg-white/[0.08] font-semibold text-white ring-1 ring-white/10"
+                  : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+              }`}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-400">
+                ✨
+              </span>
+              Assistente de IA
+            </button>
 
+            {/* Editor expansível */}
+            <button
+              type="button"
+              onClick={() => {
+                if (activeSection !== "editor") {
+                  setActiveSection("editor");
+                  setActiveTab("templates");
+                  setEditorExpanded(true);
+                } else {
+                  setEditorExpanded((current) => !current);
+                }
+              }}
+              className={`group relative flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${
+                activeSection === "editor"
+                  ? "bg-white/[0.08] font-semibold text-white ring-1 ring-white/10"
+                  : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-400">
+                  ✏️
+                </span>
+                Editor
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-slate-500 transition-transform ${
+                  editorExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {activeSection === "editor" && editorExpanded && (
+              <div className="ml-4 space-y-1 border-l border-white/10 pl-2">
+                {TABS.filter((item) => item.id !== "ia").map((item) => {
+                  const Icon = item.icon;
+                  const active = activeTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveTab(item.id)}
+                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition ${
+                        active
+                          ? "bg-sky-400/10 font-medium text-sky-300"
+                          : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Meus cartões */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("cards")}
+              className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${
+                activeSection === "cards"
+                  ? "bg-white/[0.08] font-semibold text-white ring-1 ring-white/10"
+                  : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+              }`}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-400">
+                🗂️
+              </span>
+              Meus cartões
+            </button>
+
+            {/* Administração */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setActiveSection("admin")}
+                className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${
+                  activeSection === "admin"
+                    ? "bg-white/[0.08] font-semibold text-white ring-1 ring-white/10"
+                    : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                }`}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05] text-slate-400">
+                  👥
+                </span>
+                Administração
+              </button>
+            )}
+          </nav>
           {/* Rodapé: salvar + publicação */}
           <div className="space-y-3 border-t border-white/[0.06] p-4">
             <button
@@ -1246,27 +1570,72 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Tabs (mobile) */}
-        <nav className="fixed inset-x-0 top-14 z-30 flex gap-1.5 overflow-x-auto border-b border-white/[0.06] bg-[#0d1522]/95 px-3 py-2 backdrop-blur lg:hidden">
-          {TABS.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
+        {/* Navegação (mobile) */}
+        <nav className="fixed inset-x-0 top-14 z-30 border-b border-white/[0.06] bg-[#0d1522]/95 px-3 py-2 backdrop-blur lg:hidden">
+          <div className="flex gap-1.5 overflow-x-auto">
+            {[
+              ["ia", "✨ IA"],
+              ["editor", "✏️ Editor"],
+              ["cards", "🗂️ Cartões"],
+              ...(isAdmin ? [["admin", "👥 Administração"]] : []),
+            ].map(([section, label]) => (
               <button
-                key={item.id}
+                key={section}
                 type="button"
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (section === "editor") {
+                    if (activeSection !== "editor") {
+                      setActiveSection("editor");
+                      setActiveTab("templates");
+                      setEditorExpanded(true);
+                    } else {
+                      setEditorExpanded((current) => !current);
+                    }
+                    return;
+                  }
+                  setActiveSection(section as "editor" | "cards" | "ia" | "admin");
+                  if (section === "ia") setActiveTab("ia");
+                }}
                 className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
-                  active
+                  activeSection === section
                     ? "bg-sky-400/15 text-sky-200 ring-1 ring-sky-400/30"
                     : "text-slate-400 hover:bg-white/[0.05]"
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
-                {item.label}
+                {label}
+                {section === "editor" && (
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${
+                      editorExpanded ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {activeSection === "editor" && editorExpanded && (
+            <div className="mt-2 flex gap-1.5 overflow-x-auto border-t border-white/[0.05] pt-2">
+              {TABS.filter((item) => item.id !== "ia").map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
+                      activeTab === item.id
+                        ? "bg-sky-400/15 text-sky-200 ring-1 ring-sky-400/30"
+                        : "text-slate-400 hover:bg-white/[0.05]"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* ===================== CONTEÚDO PRINCIPAL ===================== */}
@@ -1304,9 +1673,54 @@ export default function AdminPage() {
                 </button>
               </header>
 
-              <div className="grid flex-1 xl:grid-cols-[minmax(440px,600px)_1fr]">                {/* ===================== PAINEL DE CONFIG ===================== */}
+              {(activeSection === "editor" || activeSection === "ia") && (
+                <div className="grid flex-1 xl:grid-cols-[minmax(440px,600px)_1fr]">                {/* ===================== PAINEL DE CONFIG ===================== */}
                 <div className="border-b border-white/[0.06] bg-[#0c1420]/80 p-5 md:p-7 xl:border-b-0 xl:border-r xl:p-8">
-                  <div className="mx-auto w-full max-w-[520px] xl:max-w-none"></div>
+                  <div className="mx-auto w-full max-w-[520px] xl:max-w-none">
+
+                  {activeSection === "editor" && cards.length > 0 && (
+                    <div className="mb-5 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          Meus cartões
+                        </label>
+                        <span className="text-xs text-slate-500">
+                          {cards.length} / {maxCards}
+                        </span>
+                      </div>
+
+                      <select
+                        value={selectedCardId}
+                        onChange={(e) => {
+                          const card = cards.find((item: any) => item.id === e.target.value);
+                          if (card) loadCard(card);
+                        }}
+                        className="w-full rounded-xl border border-white/10 bg-[#131d2e] px-4 py-3 text-sm text-white outline-none focus:border-sky-400/60"
+                      >
+                        {cards.map((card: any) => (
+                          <option key={card.id} value={card.id}>
+                            {card.data?.name || "Cartão sem nome"}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={createNewCard}
+                        disabled={cards.length >= maxCards}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        + Criar novo cartão
+                      </button>
+
+                      {cards.length >= maxCards && (
+                        <p className="mt-2 text-center text-xs text-slate-500">
+                          Você atingiu o limite de {maxCards} cartão(ões).
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="sticky top-[104px] z-20 -mx-5 mb-6 flex items-start justify-between gap-3 border-b border-white/[0.06] bg-[#0c1420]/95 px-5 py-4 backdrop-blur md:-mx-7 md:px-7 lg:top-0 xl:-mx-8 xl:px-8">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
@@ -1749,14 +2163,14 @@ export default function AdminPage() {
                       </div>
 
                       <div className={panelCard}>
-                        <p className={panelTitle}>Tamanho das letras</p>
+                        <p className={panelTitle}>Formato da foto</p>
                         <p className={panelHint}>
-                          Ajuste cada elemento independentemente.
+                          Tamanho, bordas e cor da moldura da foto de perfil.
                         </p>
 
                         <label className="mt-4 block">
                           <span className="mb-2 flex justify-between text-xs">
-                            <span className="text-slate-300">Tamanho</span>
+                            <span className="text-slate-300">Tamanho da foto</span>
                             <span className="font-mono text-slate-500">
                               {photoSize}px
                             </span>
@@ -2370,6 +2784,7 @@ export default function AdminPage() {
                       </label>
                     </div>
                   )}
+                  </div>
                 </div>
 
                 {/* ===================== PRÉ-VISUALIZAÇÃO ===================== */}
@@ -2454,7 +2869,247 @@ export default function AdminPage() {
                     <span>Arraste o fundo para reposicionar</span>
                   </div>
                 </div>
-              </div>
+                </div>
+              )}
+
+              {activeSection === "cards" && (
+                <div className="flex-1 p-5 md:p-8">
+                  <div className="mx-auto max-w-5xl">
+                    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                      <div>
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sky-300">
+                          🗂️ Meus cartões
+                        </div>
+                        <h2 className="text-2xl font-bold text-white">Seus cartões digitais</h2>
+                        <p className="mt-1 text-sm text-slate-400">Gerencie seus cartões e escolha qual deseja editar.</p>
+                      </div>
+                      <span className="text-sm text-slate-500">{cards.length} / {maxCards} cartões</span>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {cards.map((card) => {
+                        const data = card.data || {};
+                        const previewLinks = (data.links || []).map((link: CardLink, index: number) => ({
+                          ...link,
+                          id: link.id || `preview-${card.id}-${index}`,
+                          enabled: link.enabled ?? true,
+                        }));
+
+                        return (
+                          <div key={card.id} className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03]">
+                            <div className="flex justify-center bg-[#080d16] p-4">
+                              <div className="relative h-[390px] w-[205px] overflow-hidden rounded-[2rem] border-[7px] border-[#05070c] bg-black shadow-2xl ring-1 ring-white/10">
+                                <DigitalCard
+                                  slug={card.slug}
+                                  name={data.name || "Cartão sem nome"}
+                                  job={data.job || ""}
+                                  location={data.location || ""}
+                                  photo={data.photo || ""}
+                                  background={data.background || "/images/fundo.jpg"}
+                                  backgroundColor={data.backgroundColor || "#FFFFFF"}
+                                  backgroundMode={data.backgroundMode || "template"}
+                                  links={previewLinks}
+                                  backgroundPosition={data.backgroundPosition || { x: 0, y: 0 }}
+                                  backgroundZoom={data.backgroundZoom ?? 1}
+                                  backgroundOverlay={data.backgroundOverlay ?? 40}
+                                  backgroundBlur={data.backgroundBlur ?? 8}
+                                  template={data.template || "rosa"}
+                                  isEditing={false}
+                                  usePrimaryColor={data.usePrimaryColor ?? false}
+                                  primaryColor={data.primaryColor || "#111827"}
+                                  textColor={data.textColor || "#FFFFFF"}
+                                  primaryColorOpacity={data.primaryColorOpacity ?? 60}
+                                  useTemplate={data.useTemplate ?? true}
+                                  textNameColor={data.textNameColor || "#FFFFFF"}
+                                  textJobColor={data.textJobColor || "#FFFFFF"}
+                                  textLocationColor={data.textLocationColor || "#FFFFFF"}
+                                  nameFontSize={data.nameFontSize ?? 30}
+                                  jobFontSize={data.jobFontSize ?? 16}
+                                  locationFontSize={data.locationFontSize ?? 14}
+                                  showPhoto={data.showPhoto ?? true}
+                                  showBackground={data.showBackground ?? true}
+                                  photoSize={data.photoSize ?? 112}
+                                  photoShape={data.photoShape || "circle"}
+                                  photoBorderColor={data.usePhotoBorderColor ? data.photoBorderColor : undefined}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="p-5">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <h3 className="truncate text-base font-semibold text-white">{data.name || "Cartão sem nome"}</h3>
+                                  <p className="mt-1 truncate font-mono text-xs text-slate-500">/c/{card.slug}</p>
+                                </div>
+                                <span className="shrink-0 rounded-lg bg-sky-400/10 px-2 py-1 text-[10px] font-semibold uppercase text-sky-300">Ativo</span>
+                              </div>
+                              <div className="mt-4 flex gap-2">
+                                <button type="button" onClick={() => { loadCard(card); setActiveSection("editor"); setActiveTab("templates"); setEditorExpanded(true); }} className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Editar</button>
+                                <button type="button" onClick={() => window.open(`${window.location.origin}/c/${card.slug}`, "_blank")} className="rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.1]">Abrir</button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {cards.length < maxCards && (
+                        <button type="button" onClick={createNewCard} className="flex min-h-[150px] items-center justify-center rounded-2xl border border-dashed border-sky-400/30 bg-sky-400/[0.03] p-5 text-sm font-semibold text-sky-300 transition hover:bg-sky-400/[0.08]">
+                          + Criar novo cartão
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "admin" && isAdmin && (
+                <div className="flex-1 p-5 md:p-8">
+                  <div className="mx-auto max-w-6xl">
+                    <div className="mb-6">
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-violet-400/25 bg-violet-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-violet-300">
+                        👥 Administração
+                      </div>
+                      <h2 className="text-2xl font-bold text-white">Usuários</h2>
+                      <p className="mt-1 text-sm text-slate-400">
+                        Crie contas, defina limites de cartões e gerencie o acesso.
+                      </p>
+                    </div>
+
+                    {/* Criar usuário */}
+                    <div className="mb-6 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5">
+                      <p className="text-sm font-semibold text-white">Criar novo usuário</p>
+                      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                        <input
+                          value={newUser.name}
+                          onChange={(e) => setNewUser((u) => ({ ...u, name: e.target.value }))}
+                          placeholder="Nome"
+                          className={fieldClass}
+                        />
+                        <input
+                          value={newUser.email}
+                          onChange={(e) => setNewUser((u) => ({ ...u, email: e.target.value }))}
+                          placeholder="E-mail"
+                          type="email"
+                          className={fieldClass}
+                        />
+                        <input
+                          value={newUser.password}
+                          onChange={(e) => setNewUser((u) => ({ ...u, password: e.target.value }))}
+                          placeholder="Senha"
+                          type="password"
+                          className={fieldClass}
+                        />
+                        <select
+                          value={newUser.role}
+                          onChange={(e) => setNewUser((u) => ({ ...u, role: e.target.value }))}
+                          className="rounded-xl border border-white/10 bg-[#131d2e] px-4 py-3 text-sm text-white outline-none focus:border-violet-400/60"
+                        >
+                          <option value="user">Usuário</option>
+                          <option value="admin">Administrador</option>
+                        </select>
+                        <div className="flex gap-2">
+                          <input
+                            value={newUser.maxCards}
+                            onChange={(e) => setNewUser((u) => ({ ...u, maxCards: Number(e.target.value) }))}
+                            type="number"
+                            min={1}
+                            max={50}
+                            className={`${fieldClass} w-24`}
+                            title="Limite de cartões"
+                          />
+                          <button
+                            type="button"
+                            onClick={createUser}
+                            disabled={creatingUser}
+                            className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:from-violet-400 hover:to-fuchsia-500 disabled:opacity-60"
+                          >
+                            {creatingUser ? "Criando…" : "Criar"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tabela */}
+                    <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03]">
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[860px] text-left text-sm">
+                          <thead className="border-b border-white/[0.06] bg-white/[0.02] text-xs uppercase tracking-wider text-slate-500">
+                            <tr>
+                              <th className="px-5 py-4">Usuário</th>
+                              <th className="px-5 py-4">Função</th>
+                              <th className="px-5 py-4">Cartões</th>
+                              <th className="px-5 py-4">Limite</th>
+                              <th className="px-5 py-4">Cadastro</th>
+                              <th className="px-5 py-4 text-right">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/[0.05]">
+                            {users.map((item) => (
+                              <tr key={item.id} className="text-slate-300">
+                                <td className="px-5 py-4">
+                                  <div className="font-medium text-white">{item.name || "Sem nome"}</div>
+                                  <div className="font-mono text-[11px] text-slate-500">{item.email}</div>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <span className={`rounded-lg px-2 py-1 text-xs font-semibold ${item.role === "admin" ? "bg-violet-400/15 text-violet-300" : "bg-white/[0.06] text-slate-300"}`}>
+                                    {item.role === "admin" ? "Admin" : "Usuário"}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4">{item.cards_used ?? (item.id === userId ? cards.length : "—")}</td>
+                                <td className="px-5 py-4">
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={50}
+                                    defaultValue={item.max_cards}
+                                    key={`${item.id}-${item.max_cards}`}
+                                    onBlur={(e) => {
+                                      const value = Number(e.target.value);
+                                      if (value !== item.max_cards) {
+                                        changeMaxCards(item.id, value);
+                                      }
+                                    }}
+                                    className="w-20 rounded-lg border border-white/10 bg-[#131d2e] px-2 py-1.5 text-sm text-white outline-none focus:border-violet-400/60"
+                                  />
+                                </td>
+                                <td className="px-5 py-4 text-slate-500">
+                                  {item.created_at ? new Date(item.created_at).toLocaleDateString("pt-BR") : "—"}
+                                </td>
+                                <td className="px-5 py-4">
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => resetPassword(item.id)}
+                                      className="rounded-lg border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-slate-200 transition hover:bg-white/[0.1]"
+                                    >
+                                      🔑 Senha
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteUser(item.id, item.name || item.email)}
+                                      className="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-400/20"
+                                    >
+                                      🗑 Excluir
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                            {!users.length && (
+                              <tr>
+                                <td colSpan={6} className="px-5 py-10 text-center text-slate-500">
+                                  Nenhum usuário disponível.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </section>
