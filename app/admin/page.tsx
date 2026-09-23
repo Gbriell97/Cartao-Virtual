@@ -2874,31 +2874,66 @@ alert("Alterações salvas com sucesso!");
 
               {activeSection === "cards" && (
                 <div className="flex-1 p-5 md:p-8">
-                  <div className="mx-auto max-w-5xl">
-                    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div className="mx-auto max-w-[1500px]">
+                    {/* Cabeçalho */}
+                    <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                       <div>
                         <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sky-300">
                           🗂️ Meus cartões
                         </div>
-                        <h2 className="text-2xl font-bold text-white">Seus cartões digitais</h2>
-                        <p className="mt-1 text-sm text-slate-400">Gerencie seus cartões e escolha qual deseja editar.</p>
+
+                        <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+                          Seus cartões digitais
+                        </h2>
+
+                        <p className="mt-1 text-sm text-slate-400">
+                          Gerencie e visualize todos os seus cartões.
+                        </p>
                       </div>
-                      <span className="text-sm text-slate-500">{cards.length} / {maxCards} cartões</span>
+
+                      <div className="flex items-center gap-3">
+                        <span className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-sm text-slate-400">
+                          {cards.length} / {maxCards} cartões
+                        </span>
+
+                        {cards.length < maxCards && (
+                          <button
+                            type="button"
+                            onClick={createNewCard}
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-950/30 transition hover:from-sky-400 hover:to-blue-500"
+                          >
+                            <span className="text-lg leading-none">+</span>
+                            Novo cartão
+                          </button>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    {/* Grade de cartões */}
+                    <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
                       {cards.map((card) => {
                         const data = card.data || {};
-                        const previewLinks = (data.links || []).map((link: CardLink, index: number) => ({
-                          ...link,
-                          id: link.id || `preview-${card.id}-${index}`,
-                          enabled: link.enabled ?? true,
-                        }));
+
+                        const previewLinks = (data.links || []).map(
+                          (link: CardLink, index: number) => ({
+                            ...link,
+                            id: link.id || `preview-${card.id}-${index}`,
+                            enabled: link.enabled ?? true,
+                          })
+                        );
 
                         return (
-                          <div key={card.id} className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.03]">
-                            <div className="flex justify-center bg-[#080d16] p-4">
-                              <div className="relative h-[390px] w-[205px] overflow-hidden rounded-[2rem] border-[7px] border-[#05070c] bg-black shadow-2xl ring-1 ring-white/10">
+                          <div
+                            key={card.id}
+                            className="group overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0d1624] shadow-xl shadow-black/10 transition hover:-translate-y-1 hover:border-white/[0.12] hover:bg-[#101b2b]"
+                          >
+                            {/* Preview */}
+                            <div className="relative flex h-[285px] items-center justify-center overflow-hidden bg-[#080d16] px-4 py-5">
+                              {/* brilho decorativo */}
+                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.06),transparent_65%)]" />
+
+                              {/* Mini cartão */}
+                              <div className="relative h-[300px] w-[158px] overflow-hidden rounded-[2rem] border-[5px] border-[#05070c] bg-black shadow-2xl ring-1 ring-white/10">
                                 <DigitalCard
                                   slug={card.slug}
                                   name={data.name || "Cartão sem nome"}
@@ -2909,12 +2944,16 @@ alert("Alterações salvas com sucesso!");
                                   backgroundColor={data.backgroundColor || "#FFFFFF"}
                                   backgroundMode={data.backgroundMode || "template"}
                                   links={previewLinks}
-                                  backgroundPosition={data.backgroundPosition || { x: 0, y: 0 }}
+                                  backgroundPosition={
+                                    data.backgroundPosition || { x: 0, y: 0 }
+                                  }
                                   backgroundZoom={data.backgroundZoom ?? 1}
                                   backgroundOverlay={data.backgroundOverlay ?? 40}
                                   backgroundBlur={data.backgroundBlur ?? 8}
                                   template={data.template || "rosa"}
+                                  customTemplate={data.templateData || null}
                                   isEditing={false}
+                                  compact
                                   usePrimaryColor={data.usePrimaryColor ?? false}
                                   primaryColor={data.primaryColor || "#111827"}
                                   textColor={data.textColor || "#FFFFFF"}
@@ -2930,31 +2969,85 @@ alert("Alterações salvas com sucesso!");
                                   showBackground={data.showBackground ?? true}
                                   photoSize={data.photoSize ?? 112}
                                   photoShape={data.photoShape || "circle"}
-                                  photoBorderColor={data.usePhotoBorderColor ? data.photoBorderColor : undefined}
+                                  photoBorderColor={
+                                    data.usePhotoBorderColor
+                                      ? data.photoBorderColor
+                                      : undefined
+                                  }
                                 />
                               </div>
                             </div>
 
-                            <div className="p-5">
+                            {/* Informações */}
+                            <div className="p-4">
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                  <h3 className="truncate text-base font-semibold text-white">{data.name || "Cartão sem nome"}</h3>
-                                  <p className="mt-1 truncate font-mono text-xs text-slate-500">/c/{card.slug}</p>
+                                  <h3 className="truncate text-base font-semibold text-white">
+                                    {data.name || "Cartão sem nome"}
+                                  </h3>
+
+                                  <p className="mt-1 truncate font-mono text-[11px] text-slate-500">
+                                    /c/{card.slug}
+                                  </p>
                                 </div>
-                                <span className="shrink-0 rounded-lg bg-sky-400/10 px-2 py-1 text-[10px] font-semibold uppercase text-sky-300">Ativo</span>
+
+                                <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                  Publicado
+                                </span>
                               </div>
-                              <div className="mt-4 flex gap-2">
-                                <button type="button" onClick={() => { loadCard(card); setActiveSection("editor"); setActiveTab("templates"); setEditorExpanded(true); }} className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Editar</button>
-                                <button type="button" onClick={() => window.open(`${window.location.origin}/c/${card.slug}`, "_blank")} className="rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.1]">Abrir</button>
+
+                              {/* Ações */}
+                              <div className="mt-4 grid grid-cols-2 gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    loadCard(card);
+                                    setActiveSection("editor");
+                                    setActiveTab("templates");
+                                    setEditorExpanded(true);
+                                  }}
+                                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:from-sky-400 hover:to-blue-500"
+                                >
+                                  ✏️ Editar
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    window.open(
+                                      `${window.location.origin}/c/${card.slug}`,
+                                      "_blank"
+                                    )
+                                  }
+                                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.1] hover:text-white"
+                                >
+                                  👁 Ver
+                                </button>
                               </div>
                             </div>
                           </div>
                         );
                       })}
 
+                      {/* Novo cartão */}
                       {cards.length < maxCards && (
-                        <button type="button" onClick={createNewCard} className="flex min-h-[150px] items-center justify-center rounded-2xl border border-dashed border-sky-400/30 bg-sky-400/[0.03] p-5 text-sm font-semibold text-sky-300 transition hover:bg-sky-400/[0.08]">
-                          + Criar novo cartão
+                        <button
+                          type="button"
+                          onClick={createNewCard}
+                          className="group flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-sky-400/20 bg-sky-400/[0.02] p-5 text-center transition hover:border-sky-400/40 hover:bg-sky-400/[0.05]"
+                        >
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-3xl text-sky-300 transition group-hover:scale-110">
+                            +
+                          </div>
+
+                          <span className="mt-4 text-sm font-semibold text-sky-300">
+                            Criar novo cartão
+                          </span>
+
+                          <span className="mt-1 text-xs text-slate-500">
+                            {cards.length} de {maxCards} utilizados
+                          </span>
                         </button>
                       )}
                     </div>

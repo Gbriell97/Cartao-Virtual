@@ -108,6 +108,7 @@ type DigitalCardProps = {
   ) => void;
 
   isEditing?: boolean;
+  compact?: boolean;
   template?: string;
   customTemplate?: any;
   usePrimaryColor?: boolean;
@@ -243,6 +244,7 @@ export default function DigitalCard({
   onBackgroundPointerMove,
   onBackgroundPointerUp,
   isEditing = false,
+  compact = false,
   template = "azul",
   usePrimaryColor = false,
   primaryColor = "#FFFFFF",
@@ -883,7 +885,11 @@ export default function DigitalCard({
   }
 
   return (
-    <main className="relative h-[100dvh] w-full overflow-hidden">
+    <main
+      className={`relative w-full overflow-hidden ${
+        compact ? "h-full" : "h-[100dvh]"
+      }`}
+    >
       <div
         className={`relative w-full h-full max-w-none min-h-0 overflow-hidden shadow-2xl border border-white/20 ${currentTemplate.cardRadius} ${
           isGlassTemplate ? "ring-1 ring-white/20 shadow-black/30" : ""
