@@ -2910,7 +2910,7 @@ alert("Alterações salvas com sucesso!");
                     </div>
 
                     {/* Grade de cartões */}
-                    <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+                    <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
                       {cards.map((card) => {
                         const data = card.data || {};
 
