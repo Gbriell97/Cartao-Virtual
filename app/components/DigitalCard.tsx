@@ -333,6 +333,8 @@ export default function DigitalCard({
     "glass-pro": { container: "text-center", profile: "mt-3" },
     "glass-frost": { container: "text-center", profile: "mt-3" },
     "glass-dark": { container: "text-center", profile: "mt-3" },
+    biolink: { container: "text-center", profile: "mt-4" },
+    showcase: { container: "text-left", profile: "mt-2" },
   };
 
   const currentLayout = layoutStyles[layoutType] ?? layoutStyles.modern;
@@ -516,15 +518,7 @@ export default function DigitalCard({
           <div className="flex items-center gap-5 rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-md">
             {shouldShowPhoto && photo && (
               <div style={photoOverrideStyle} className={`shrink-0 overflow-hidden shadow-xl ${currentTemplate.photoStyle} h-24 w-24`}>
-                {showPhoto && photo && (
-                  <img
-                    src={photo}
-                    alt={`Foto de ${name}`}
-                    width={112}
-                    height={112}
-                  />
-                )} className="h-full w-full object-cover" 
-                /&gt;
+                <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
               </div>
             )}
             <div className="min-w-0 flex-1 text-left">
@@ -795,6 +789,78 @@ export default function DigitalCard({
       );
     }
 
+    if (layoutType === "biolink") {
+      const socialLinks = links.filter((link) =>
+        ["instagram", "whatsapp", "linkedin", "youtube"].includes(link.type)
+      );
+
+      return (
+        <div className="px-6 pb-4 pt-8 text-center">
+          {shouldShowPhoto && photo && (
+            <div style={photoOverrideStyle} className={`relative mx-auto overflow-hidden shadow-2xl ${currentTemplate.photoStyle} ${currentTemplate.profileSize}`}>
+              <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
+            </div>
+          )}
+
+          <h1 className={`mt-5 ${adaptiveNameClass} font-extrabold break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
+          <p className={`mt-1 ${adaptiveJobClass} font-medium`} style={{ color: finalJobColor, opacity: 0.85, fontSize: `${jobFontSize}px` }}>{job}</p>
+
+          {hasLocation && (
+            <div className="mx-auto mt-3 flex w-fit max-w-full items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs backdrop-blur-md" style={{ color: finalLocationColor, fontSize: `${locationFontSize}px` }}>
+              <FaMapMarkerAlt size={11} />
+              <span className="truncate">{location}</span>
+            </div>
+          )}
+
+          {socialLinks.length > 0 && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              {socialLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={getLinkUrl(link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  aria-label={link.name}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition hover:scale-110 ${currentTemplate.buttonStyle}`}
+                  style={{ ...getButtonStyle(), color: textColor }}
+                >
+                  {getIcon(link.type)}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (layoutType === "showcase") {
+      return (
+        <div className="px-5 pt-4">
+          <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-black/30 p-4 backdrop-blur-md">
+            {shouldShowPhoto && photo && (
+              <div style={photoOverrideStyle} className={`h-20 w-20 shrink-0 overflow-hidden shadow-xl ${currentTemplate.photoStyle}`}>
+                <Image src={photo} alt={`Foto de ${name}`} width={112} height={112} className="h-full w-full object-cover" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: textColor, opacity: 0.6 }}>
+                Meus serviços
+              </p>
+              <h1 className={`${adaptiveNameClass} font-black uppercase leading-tight break-words`} style={{ color: finalNameColor, fontSize: `${nameFontSize}px` }}>{name}</h1>
+              <p className={`mt-0.5 ${adaptiveJobClass} font-bold uppercase`} style={{ color: finalJobColor, opacity: 0.85, fontSize: `${jobFontSize}px` }}>{job}</p>
+              {hasLocation && (
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium" style={{ color: finalLocationColor, opacity: 0.7, fontSize: `${locationFontSize}px` }}>
+                  <FaMapMarkerAlt size={11} />
+                  <span className="truncate">{location}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return renderProfile();
   }
 
@@ -864,6 +930,64 @@ export default function DigitalCard({
           {links.map((link, index) =>
             renderLinkItem(link, index, "border-b border-yellow-600/40 py-3 text-center font-serif transition hover:bg-white/5", "justify-center")
           )}
+        </div>
+      );
+    }
+
+    if (layoutType === "biolink") {
+      return (
+        <div className="min-h-0 flex-1 touch-pan-y space-y-3 overflow-y-auto px-6 pb-8 [&::-webkit-scrollbar]:hidden">
+          {links.map((link, index) => (
+            <a
+              key={index}
+              onPointerDown={(e) => e.stopPropagation()}
+              href={getLinkUrl(link)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...getButtonStyle(), color: textColor }}
+              className={`flex w-full items-center justify-between gap-3 px-5 shadow-lg transition hover:scale-[1.02] ${currentTemplate.buttonHeight} ${currentTemplate.buttonFont} ${currentTemplate.buttonStyle}`}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="shrink-0">{getIcon(link.type)}</span>
+                <span className="min-w-0 break-words">{link.name}</span>
+              </span>
+              <span className="shrink-0 opacity-60">›</span>
+            </a>
+          ))}
+        </div>
+      );
+    }
+
+    if (layoutType === "showcase") {
+      return (
+        <div className="min-h-0 flex-1 touch-pan-y space-y-4 overflow-y-auto px-5 pb-28 pt-3 [&::-webkit-scrollbar]:hidden">
+          {links.map((link, index) => (
+            <a
+              key={index}
+              onPointerDown={(e) => e.stopPropagation()}
+              href={getLinkUrl(link)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...getButtonStyle(), color: textColor }}
+              className={`group relative flex min-h-[92px] w-full items-center overflow-hidden px-5 shadow-xl transition hover:scale-[1.02] ${currentTemplate.buttonHeight} ${currentTemplate.buttonFont} ${currentTemplate.buttonStyle}`}
+            >
+              <span
+                className="pointer-events-none absolute -right-6 -top-6 opacity-[0.12] transition group-hover:scale-110"
+                style={{ color: textColor }}
+              >
+                {getIcon(link.type)}
+              </span>
+              <span className="relative flex min-w-0 items-center gap-4">
+                <span className="shrink-0">{getIcon(link.type)}</span>
+                <span className="min-w-0">
+                  <span className="block break-words">{link.name}</span>
+                  <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.2em] opacity-60">
+                    Toque para abrir
+                  </span>
+                </span>
+              </span>
+            </a>
+          ))}
         </div>
       );
     }
@@ -1028,6 +1152,24 @@ export default function DigitalCard({
           {/* Links */}
           {renderLinks()}
         </div>
+
+        {/* Botão flutuante de WhatsApp (vitrine) */}
+        {layoutType === "showcase" && (() => {
+          const whatsappLink = links.find((link) => link.type === "whatsapp");
+          if (!whatsappLink) return null;
+          return (
+            <a
+              href={getLinkUrl(whatsappLink)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onPointerDown={(e) => e.stopPropagation()}
+              aria-label="Falar no WhatsApp"
+              className="absolute bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_8px_30px_rgba(37,211,102,0.5)] transition hover:scale-105"
+            >
+              <FaWhatsapp size={30} />
+            </a>
+          );
+        })()}
 
         {/* Modal QR Code */}
         {showQRCode && (

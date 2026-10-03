@@ -23,11 +23,12 @@ Diretrizes:
 - mood, layoutType, decoration: coerentes com o ramo e com a identidade da logo
 - icon: UM ícone da lista que represente o ramo (vira marca d'água do cartão)
 - customDetails: traduza o estilo em decisões concretas
+- layoutType "biolink" para cartões focados em redes sociais e lista de links; "showcase" para cartões que vendem serviços com banners grandes em destaque
 
 Responda APENAS com JSON válido (sem markdown):
 {
   "name": "nome criativo e curto",
-  "layoutType": "modern | professional | classic | luxury | glass-pro | glass-frost | glass-dark | glass | minimal | tech | dark | bold | elegant | health | beauty | nature",
+  "layoutType": "modern | professional | classic | luxury | glass-pro | glass-frost | glass-dark | glass | minimal | tech | dark | bold | elegant | health | beauty | nature | biolink | showcase",
   "gradient": ["#hex1", "#hex2", "#hex3"],
   "gradientAngle": número 90-170,
   "primaryColor": "#hex",

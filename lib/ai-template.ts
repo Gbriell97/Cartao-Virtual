@@ -83,7 +83,9 @@ const LAYOUT_BASE: Record<string, string> = {
   "glass-pro": "vidro-pro",
   "glass-frost": "vidro-frost",
   "glass-dark": "vidro-dark",
-  "glass-clear": "glass-clear",
+  "glass-clear": "vidro-clear",
+  biolink: "biolink-neon",
+  showcase: "vitrine-pro",
 };
 
 function luminance(hex: string) {

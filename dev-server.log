@@ -1,0 +1,20 @@
+
+> cartao-virtual@0.1.0 dev
+> next dev -p 7100
+
+▲ Next.js 16.3.4 (Turbopack)
+- Local:         http://localhost:7100
+- Network:       http://10.2.0.2:7100
+- Environments: .env.local
+✓ Ready in 7.3s
+⚠ Warning: Next.js ignored package-lock.json in C:\Users\gabri because it is outside the current Git repository (C:\Users\gabri\Desktop\Projetos\cartao-virtual).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 387ms
+
+○ Compiling /login ...
+ GET /login 200 in 45s (next.js: 44s, application-code: 1330ms)
+ GET /login 200 in 130ms (next.js: 14ms, application-code: 116ms)
+ GET /admin 200 in 1452ms (next.js: 407ms, application-code: 1044ms)
+ GET / 307 in 770ms (next.js: 591ms, application-code: 180ms)
+[?25h
